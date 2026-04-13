@@ -44,8 +44,32 @@ export default function game() {
     k.text("SCORE : 0", { font: "mania", size: 72 }),
     k.pos(20, 20),
   ]);
+
+  const lightningBarBg = k.add([
+    k.rect(300, 20),
+    k.pos(20, 110),
+    k.color(0, 0, 0),
+    k.outline(2, k.rgb(255, 255, 255)),
+    k.fixed(),
+  ]);
+
+  const lightningBar = k.add([
+    k.rect(0, 20),
+    k.pos(20, 110),
+    k.color(255, 255, 0),
+    k.fixed(),
+  ]);
+
+  const lightningText = k.add([
+    k.text("LIGHTNING", { font: "mania", size: 24 }),
+    k.pos(20, 85),
+    k.fixed(),
+  ]);
+
   let score = 0;
   let scoreMultiplier = 0;
+  let lightningPoints = 0;
+  const maxLightningPoints = 3;
   sonic.onCollide("ring", (ring) => {
     k.play("ring", { volume: 0.5 });
     k.destroy(ring);
@@ -55,6 +79,16 @@ export default function game() {
     k.wait(1, () => {
       sonic.ringCollectUI.text = "";
     });
+
+    if (lightningPoints < maxLightningPoints) {
+      lightningPoints++;
+      lightningBar.width = (lightningPoints / maxLightningPoints) * 300;
+      if (lightningPoints === maxLightningPoints) {
+        lightningBar.color = k.rgb(255, 255, 200);
+        lightningText.text = "LIGHTNING READY! (Press F)";
+        k.play("hyper-ring", { volume: 0.3 });
+      }
+    }
   });
   sonic.onCollide("enemy", (enemy) => {
     if (!sonic.isGrounded()) {
@@ -100,6 +134,80 @@ export default function game() {
     k.play("hurt", { volume: 0.5 });
     k.setData("current-score", score);
     k.go("gameover", citySfx);
+  });
+
+  k.onButtonPress("shoot", () => {
+    if (lightningPoints < maxLightningPoints) return;
+
+    lightningPoints = 0;
+    lightningBar.width = 0;
+    lightningBar.color = k.rgb(255, 255, 0);
+    lightningText.text = "LIGHTNING";
+
+    k.play("hyper-ring", { volume: 0.8 });
+    k.shake(15);
+
+    // Visual Effect: lightning beam
+    const beam = k.add([
+      k.rect(k.width(), 80),
+      k.pos(sonic.pos.x, sonic.pos.y - 40),
+      k.color(255, 250, 150),
+      k.opacity(1),
+      k.z(150),
+    ]);
+
+    beam.onUpdate(() => {
+      beam.opacity -= k.dt() * 4;
+      if (beam.opacity <= 0) k.destroy(beam);
+    });
+
+    // Decorative lightning bolts
+    for (let i = 0; i < 8; i++) {
+        k.add([
+            k.rect(k.width(), k.rand(5, 15)),
+            k.pos(sonic.pos.x, sonic.pos.y - 40 + k.rand(-100, 100)),
+            k.color(255, 255, 0),
+            k.opacity(0.8),
+            k.z(149),
+        ]).onUpdate(function() {
+            this.opacity -= k.dt() * 6;
+            if (this.opacity <= 0) k.destroy(this);
+        });
+    }
+
+    // Destroy all enemies in front
+    k.get("enemy").forEach((enemy) => {
+      if (enemy.pos.x > sonic.pos.x) {
+        k.play("destroy", { volume: 0.5 });
+        const pos = enemy.pos;
+        k.destroy(enemy);
+
+        const blood = k.add([
+          k.sprite("blood", { anim: "splash" }),
+          k.pos(pos),
+          k.scale(3),
+          k.anchor("center"),
+          k.z(100),
+        ]);
+        blood.onAnimEnd((anim) => {
+          k.destroy(blood);
+        });
+
+        const crushed = k.add([
+          k.sprite("minion_crushed", { anim: "crushed" }),
+          k.pos(pos),
+          k.scale(2.5),
+          k.anchor("center"),
+          k.z(99),
+        ]);
+        crushed.onAnimEnd((anim) => {
+          k.destroy(crushed);
+        });
+
+        score += 50;
+        scoreText.text = `SCORE : ${score}`;
+      }
+    });
   });
 
   let gameSpeed = 300;

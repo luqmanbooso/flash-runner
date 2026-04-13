@@ -11,6 +11,9 @@ const k = kaplay({
       keyboard: ["space"],
       mouse: "left",
     },
+    shoot: {
+      keyboard: ["f", "shift"],
+    },
   },
   touchToMouse: true,
   debug: false,
