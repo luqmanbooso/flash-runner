@@ -3,7 +3,7 @@ import k from "../kaplayCtx";
 export function makeSonic(pos) {
   const sonic = k.add([
     k.sprite("sonic", { anim: "run" }),
-    k.scale(4),
+    k.scale(1.3),
     k.area(),
     k.anchor("center"),
     k.pos(pos),
