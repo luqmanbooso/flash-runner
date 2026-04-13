@@ -1,6 +1,6 @@
 import k from "../kaplayCtx";
 import { makeSonic } from "../entities/sonic";
-import { makeMotobug } from "../entities/motobug";
+import { makeMinion } from "../entities/minion";
 import { makeRing } from "../entities/ring";
 
 export default function game() {
@@ -61,6 +61,28 @@ export default function game() {
       k.play("destroy", { volume: 0.5 });
       k.play("hyper-ring", { volume: 0.5 });
       k.destroy(enemy);
+      const blood = k.add([
+        k.sprite("blood", { anim: "splash" }),
+        k.pos(enemy.pos),
+        k.scale(3),
+        k.anchor("center"),
+        k.z(100),
+      ]);
+      blood.onAnimEnd((anim) => {
+        if (anim === "splash") k.destroy(blood);
+      });
+
+      const crushed = k.add([
+        k.sprite("minion_crushed", { anim: "crushed" }),
+        k.pos(enemy.pos),
+        k.scale(2.5),
+        k.anchor("center"),
+        k.z(99),
+      ]);
+      crushed.onAnimEnd((anim) => {
+        if (anim === "crushed") k.destroy(crushed);
+      });
+
       sonic.play("jump");
       sonic.jump();
       scoreMultiplier += 1;
@@ -85,26 +107,26 @@ export default function game() {
     gameSpeed += 50;
   });
 
-  const spawnMotoBug = () => {
-    const motobug = makeMotobug(k.vec2(1950, 773));
-    motobug.onUpdate(() => {
+  const spawnMinion = () => {
+    const minion = makeMinion(k.vec2(1950, 773));
+    minion.onUpdate(() => {
       if (gameSpeed < 3000) {
-        motobug.move(-(gameSpeed + 300), 0);
+        minion.move(-(gameSpeed + 300), 0);
         return;
       }
-      motobug.move(-gameSpeed, 0);
+      minion.move(-gameSpeed, 0);
     });
 
-    motobug.onExitScreen(() => {
-      if (motobug.pos.x < 0) k.destroy(motobug);
+    minion.onExitScreen(() => {
+      if (minion.pos.x < 0) k.destroy(minion);
     });
 
     const waitTime = k.rand(0.5, 2.5);
 
-    k.wait(waitTime, spawnMotoBug);
+    k.wait(waitTime, spawnMinion);
   };
 
-  spawnMotoBug();
+  spawnMinion();
 
   const spawnRing = () => {
     const ring = makeRing(k.vec2(1950, 745));

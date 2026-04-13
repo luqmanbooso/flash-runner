@@ -21,11 +21,25 @@ k.loadSprite("ring", "graphics/ring.png", {
     spin: { from: 0, to: 15, loop: true, speed: 30 },
   },
 });
-k.loadSprite("motobug", "graphics/motobug.png", {
+k.loadSprite("minion", "graphics/minion.png", {
+  sliceX: 4,
+  sliceY: 1,
+  anims: {
+    run: { from: 0, to: 3, loop: true, speed: 15 },
+  },
+});
+k.loadSprite("minion_crushed", "graphics/minion_clean.png", {
+  sliceX: 4,
+  sliceY: 1,
+  anims: {
+    crushed: { from: 0, to: 3, loop: false, speed: 12 },
+  },
+});
+k.loadSprite("blood", "graphics/blood_clean.png", {
   sliceX: 5,
   sliceY: 1,
   anims: {
-    run: { from: 0, to: 4, loop: true, speed: 8 },
+    splash: { from: 0, to: 4, loop: false, speed: 20 },
   },
 });
 k.loadFont("mania", "fonts/mania.ttf");
